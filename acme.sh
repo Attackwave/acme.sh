@@ -1916,16 +1916,22 @@ _inithttp() {
 
 }
 
-# body  url [needbase64] [POST|PUT|DELETE] [ContentType]
+# body  url [needbase64] [POST|PUT|DELETE] [ContentType] [Post from file]
 _post() {
   body="$1"
   _post_url="$2"
   needbase64="$3"
   httpmethod="$4"
   _postContentType="$5"
+  body_tmp="$6"
 
   if [ -z "$httpmethod" ]; then
     httpmethod="POST"
+  fi
+  if [ "$body_tmp" = "Y" ]; then
+    body_tmp_file=$(_mktemp)
+    printf "%s" "$body" > $body_tmp_file
+    body=@$body_tmp_file
   fi
   _debug $httpmethod
   _debug "_post_url" "$_post_url"
