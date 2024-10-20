@@ -79,9 +79,9 @@ truenas_deploy() {
 
   _info "Getting current active certificate from TrueNAS"
   _response=$(_get "$_api_url/system/general")
-  _active_cert_id=$(echo "$_response" | grep -B2 '"name":' | grep 'id' | tr -d -- '"id: ,')
-  _active_cert_name=$(echo "$_response" | grep '"name":' | sed -n 's/.*: "\(.\{1,\}\)",$/\1/p')
-  _param_httpsredirect=$(echo "$_response" | grep '"ui_httpsredirect":' | sed -n 's/.*": \(.\{1,\}\),$/\1/p')
+  _active_cert_id=$(echo "$_response" | tr '\n' ' ' | jq -r ."ui_certificate"."id")
+  _active_cert_name=$(echo "$_response" | tr '\n' ' ' | jq -r ."ui_certificate"."name")
+  _param_httpsredirect=$(echo "$_response" | tr '\n' ' ' | jq -r ."ui_httpsredirect")
   _debug Active_UI_Certificate_ID "$_active_cert_id"
   _debug Active_UI_Certificate_Name "$_active_cert_name"
   _debug Active_UI_http_redirect "$_param_httpsredirect"
@@ -99,7 +99,7 @@ truenas_deploy() {
   _debug3 _certname "$_certname"
 
   _certData="{\"create_type\": \"CERTIFICATE_CREATE_IMPORTED\", \"name\": \"${_certname}\", \"certificate\": \"$(_json_encode <"$_cfullchain")\", \"privatekey\": \"$(_json_encode <"$_ckey")\"}"
-  _add_cert_result="$(_post "$_certData" "$_api_url/certificate" "" "POST" "application/json")"
+  _add_cert_result="$(_post "$_certData" "$_api_url/certificate" "" "POST" "application/json" "Y")"
 
   _debug3 _add_cert_result "$_add_cert_result"
 
